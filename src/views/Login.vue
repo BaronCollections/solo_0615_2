@@ -2,6 +2,7 @@
 import { User, Lock } from '@element-plus/icons-vue'
 import { mockUsers } from '../mock/accounts'
 import { useLogin } from '../composables/useLogin'
+import { normalizeUsername } from '../utils/auth'
 
 const {
   loginFormRef,
@@ -10,11 +11,19 @@ const {
   rememberMe,
   loginForm,
   loginRules,
+  isLocked,
+  countdownSeconds,
   getRoleTagType,
   handleRememberMeChange,
   handleLogin,
   handleLogout
 } = useLogin()
+
+const handleUsernameBlur = () => {
+  loginForm.username = normalizeUsername(loginForm.username)
+}
+
+void loginFormRef
 </script>
 
 <template>
@@ -36,6 +45,7 @@ const {
             placeholder="请输入账号"
             :prefix-icon="User"
             clearable
+            @blur="handleUsernameBlur"
           />
         </el-form-item>
 
@@ -46,6 +56,7 @@ const {
             placeholder="请输入密码"
             :prefix-icon="Lock"
             show-password
+            :disabled="isLocked"
             @keyup.enter="handleLogin"
           />
         </el-form-item>
@@ -56,14 +67,27 @@ const {
           </el-checkbox>
         </el-form-item>
 
+        <el-alert
+          v-if="isLocked"
+          type="warning"
+          :closable="false"
+          show-icon
+          class="lock-alert"
+        >
+          <template #title>
+            账号已锁定，<span class="countdown">{{ countdownSeconds }}</span> 秒后可重试
+          </template>
+        </el-alert>
+
         <el-form-item>
           <el-button
             type="primary"
             class="login-btn"
             :loading="loading"
+            :disabled="isLocked"
             @click="handleLogin"
           >
-            登 录
+            {{ isLocked ? `锁定中 ${countdownSeconds}s` : '登 录' }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -158,6 +182,16 @@ const {
   height: 44px;
   font-size: 16px;
   letter-spacing: 8px;
+}
+
+.lock-alert {
+  margin-bottom: 18px;
+}
+
+.lock-alert .countdown {
+  font-weight: 700;
+  color: #e6a23c;
+  font-size: 16px;
 }
 
 .test-accounts {
