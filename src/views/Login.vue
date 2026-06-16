@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { User, Lock } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { mockUsers } from '../mock/accounts'
 import { useLogin } from '../composables/useLogin'
 import { normalizeUsername } from '../utils/auth'
+import { watch } from 'vue'
+
+const router = useRouter()
 
 const {
   loginFormRef,
@@ -23,7 +27,18 @@ const handleUsernameBlur = () => {
   loginForm.username = normalizeUsername(loginForm.username)
 }
 
-void loginFormRef
+watch(loggedInUser, (val) => {
+  if (val) {
+    localStorage.setItem('smart_campus_current_user', JSON.stringify(val))
+    router.push('/')
+  }
+})
+
+const handleLogoutAndRedirect = () => {
+  handleLogout()
+  localStorage.removeItem('smart_campus_current_user')
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -106,28 +121,6 @@ void loginFormRef
         />
       </div>
     </div>
-
-    <div v-else class="success-card">
-      <el-result icon="success" title="登录成功">
-        <template #sub-title>
-          <div class="user-info">
-            <p>
-              <span class="label">姓名：</span>
-              <span class="value">{{ loggedInUser.name }}</span>
-            </p>
-            <p>
-              <span class="label">角色：</span>
-              <el-tag :type="getRoleTagType(loggedInUser.role)">
-                {{ loggedInUser.roleLabel }}
-              </el-tag>
-            </p>
-          </div>
-        </template>
-        <template #extra>
-          <el-button type="primary" @click="handleLogout">退出登录</el-button>
-        </template>
-      </el-result>
-    </div>
   </div>
 </template>
 
@@ -143,14 +136,6 @@ void loginFormRef
 .login-card {
   width: 420px;
   padding: 40px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.success-card {
-  width: 480px;
-  padding: 20px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -202,27 +187,5 @@ void loginFormRef
 
 .account-item :deep(.el-alert__content) {
   width: 100%;
-}
-
-.user-info {
-  text-align: left;
-  padding: 16px 24px;
-  background: #f5f7fa;
-  border-radius: 8px;
-}
-
-.user-info p {
-  margin: 8px 0;
-  font-size: 15px;
-}
-
-.user-info .label {
-  color: #606266;
-  font-weight: 500;
-}
-
-.user-info .value {
-  color: #303133;
-  font-weight: 600;
 }
 </style>
