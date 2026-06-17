@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { ArrowDown, View } from '@element-plus/icons-vue'
 import { useRepair } from '../composables/useRepair'
 import type { RepairRecord, RepairStatus } from '../mock/repairs'
 import { ElMessageBox } from 'element-plus'
@@ -8,9 +8,11 @@ import { ElMessageBox } from 'element-plus'
 const { repairs, addRepair, updateRepair, updateRepairStatus, deleteRepair } = useRepair()
 
 const dialogVisible = ref(false)
+const detailVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const search = ref('')
+const currentDetail = ref<RepairRecord | null>(null)
 
 const form = ref({
   id: '',
@@ -28,7 +30,7 @@ const rules = {
 }
 
 const statusMap: Record<RepairStatus, { label: string; type: string }> = {
-  pending: { label: '待处理', type: 'warning' },
+  pending: { label: '待受理', type: 'warning' },
   processing: { label: '处理中', type: 'primary' },
   done: { label: '已完成', type: 'success' }
 }
@@ -81,8 +83,25 @@ const handleSubmit = async () => {
   dialogVisible.value = false
 }
 
+const openDetail = (row: RepairRecord) => {
+  currentDetail.value = row
+  detailVisible.value = true
+}
+
+const getCurrentDetail = computed(() => {
+  if (!currentDetail.value) return null
+  const latest = repairs.value.find(r => r.id === currentDetail.value!.id)
+  return latest || currentDetail.value
+})
+
 const handleStatusChange = (row: RepairRecord, status: RepairStatus) => {
   updateRepairStatus(row.id, status)
+}
+
+const handleDetailStatusChange = (status: RepairStatus) => {
+  if (currentDetail.value) {
+    updateRepairStatus(currentDetail.value.id, status)
+  }
 }
 
 const handleDelete = (row: RepairRecord) => {
@@ -123,8 +142,12 @@ const handleDelete = (row: RepairRecord) => {
         </template>
       </el-table-column>
       <el-table-column prop="createdAt" label="报修日期" width="120" />
-      <el-table-column label="操作" width="260" fixed="right">
+      <el-table-column label="操作" width="360" fixed="right">
         <template #default="{ row }">
+          <el-button size="small" @click="openDetail(row)">
+            <el-icon><view /></el-icon>
+            查看
+          </el-button>
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
           <el-dropdown v-if="row.status !== 'done'" style="margin-left: 8px" @command="(cmd: string) => handleStatusChange(row, cmd as RepairStatus)">
             <el-button size="small" type="primary">
@@ -155,7 +178,7 @@ const handleDelete = (row: RepairRecord) => {
         </el-form-item>
         <el-form-item v-if="isEdit" label="状态">
           <el-select v-model="form.status">
-            <el-option label="待处理" value="pending" />
+            <el-option label="待受理" value="pending" />
             <el-option label="处理中" value="processing" />
             <el-option label="已完成" value="done" />
           </el-select>
@@ -168,6 +191,50 @@ const handleDelete = (row: RepairRecord) => {
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog v-model="detailVisible" title="工单详情" width="560px">
+      <div v-if="getCurrentDetail" class="detail-content">
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="工单编号">
+          {{ getCurrentDetail.id }}
+        </el-descriptions-item>
+        <el-descriptions-item label="报修标题">
+          {{ getCurrentDetail.title }}
+        </el-descriptions-item>
+        <el-descriptions-item label="报修地点">
+          {{ getCurrentDetail.location }}
+        </el-descriptions-item>
+        <el-descriptions-item label="报修人">
+          {{ getCurrentDetail.reporter }}
+        </el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="getStatusTag(getCurrentDetail.status).type">
+            {{ getStatusTag(getCurrentDetail.status).label }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="报修日期">
+          {{ getCurrentDetail.createdAt }}
+        </el-descriptions-item>
+        <el-descriptions-item label="问题描述">
+          {{ getCurrentDetail.description || '无' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <div v-if="getCurrentDetail.status !== 'done'" class="detail-actions">
+        <el-dropdown @command="(cmd: string) => handleDetailStatusChange(cmd as RepairStatus)">
+          <el-button type="primary">
+            更新状态<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-if="getCurrentDetail.status === 'pending'" command="processing">处理中</el-dropdown-item>
+              <el-dropdown-item command="done">已完成</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -189,5 +256,15 @@ const handleDelete = (row: RepairRecord) => {
 .actions {
   display: flex;
   gap: 12px;
+}
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
 }
 </style>
