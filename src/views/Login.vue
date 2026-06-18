@@ -17,11 +17,11 @@ const {
   loginRules,
   isLocked,
   countdownSeconds,
-  getRoleTagType,
   handleRememberMeChange,
-  handleLogin,
-  handleLogout
+  handleLogin
 } = useLogin()
+
+void loginFormRef
 
 const handleUsernameBlur = () => {
   loginForm.username = normalizeUsername(loginForm.username)
@@ -33,12 +33,6 @@ watch(loggedInUser, (val) => {
     router.push('/')
   }
 })
-
-const handleLogoutAndRedirect = () => {
-  handleLogout()
-  localStorage.removeItem('smart_campus_current_user')
-  router.push('/login')
-}
 </script>
 
 <template>

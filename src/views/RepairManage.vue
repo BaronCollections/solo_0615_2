@@ -5,6 +5,8 @@ import { useRepair } from '../composables/useRepair'
 import type { RepairRecord, RepairStatus } from '../mock/repairs'
 import { ElMessageBox } from 'element-plus'
 
+void View
+
 const { repairs, addRepair, updateRepair, updateRepairStatus, deleteRepair } = useRepair()
 
 const dialogVisible = ref(false)

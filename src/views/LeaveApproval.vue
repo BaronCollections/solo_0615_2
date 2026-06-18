@@ -5,6 +5,8 @@ import { useLeave } from '../composables/useLeave'
 import type { LeaveRecord, LeaveStatus } from '../mock/leaves'
 import { ElMessageBox } from 'element-plus'
 
+void View
+
 const { leaves, approveLeave, rejectLeave, deleteLeave } = useLeave()
 
 const detailVisible = ref(false)
