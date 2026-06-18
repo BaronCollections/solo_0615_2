@@ -2,21 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick, ref, computed } from 'vue'
 import ElementPlus from 'element-plus'
-import { clearAllData } from '../src/utils/storage'
 import type { RepairRecord, RepairStatus } from '../src/mock/repairs'
-
-vi.mock('element-plus', async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual as object,
-    ElMessage: {
-      success: vi.fn()
-    },
-    ElMessageBox: {
-      confirm: vi.fn().mockResolvedValue(true)
-    }
-  }
-})
 
 async function freshUseRepair() {
   vi.resetModules()
@@ -36,7 +22,8 @@ async function mountRepairManage() {
 
 describe('RepairManage - 报修流转回归测试', () => {
   beforeEach(() => {
-    clearAllData()
+    localStorage.clear()
+    sessionStorage.clear()
   })
 
   it('表格行状态与 repairs 源数据联动（源数据更新后表格行同步）', async () => {

@@ -1,12 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { clearAllData } from '../src/utils/storage'
 import { mockRepairs } from '../src/mock/repairs'
-
-vi.mock('element-plus', () => ({
-  ElMessage: {
-    success: vi.fn()
-  }
-}))
 
 async function freshUseRepair() {
   vi.resetModules()
@@ -16,7 +9,8 @@ async function freshUseRepair() {
 
 describe('useRepair - 状态流转回归测试', () => {
   beforeEach(() => {
-    clearAllData()
+    localStorage.clear()
+    sessionStorage.clear()
   })
 
   it('待受理工单切到处理中后，repairs 列表同步更新', async () => {
