@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { School, Reading, SetUp } from '@element-plus/icons-vue'
+import { School, Reading, SetUp, Document } from '@element-plus/icons-vue'
 import type { MockUser } from '../mock/accounts'
 
 const router = useRouter()
@@ -61,6 +61,10 @@ const handleLogout = () => {
         <el-menu-item index="/repairs">
           <el-icon><SetUp /></el-icon>
           <template #title>报修管理</template>
+        </el-menu-item>
+        <el-menu-item index="/leaves">
+          <el-icon><Document /></el-icon>
+          <template #title>请假审批</template>
         </el-menu-item>
       </el-menu>
     </el-aside>

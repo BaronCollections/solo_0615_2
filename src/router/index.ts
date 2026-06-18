@@ -28,6 +28,11 @@ const router = createRouter({
           path: 'repairs',
           name: 'Repairs',
           component: () => import('../views/RepairManage.vue')
+        },
+        {
+          path: 'leaves',
+          name: 'Leaves',
+          component: () => import('../views/LeaveApproval.vue')
         }
       ]
     }

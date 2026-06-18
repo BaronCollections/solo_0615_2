@@ -1,5 +1,5 @@
 const STORAGE_PREFIX = 'smart_campus_'
-const DATA_KEYS = ['classes', 'courses', 'repairs'] as const
+const DATA_KEYS = ['classes', 'courses', 'repairs', 'leaves'] as const
 
 function getFullKey(key: string): string {
   return `${STORAGE_PREFIX}${key}`
